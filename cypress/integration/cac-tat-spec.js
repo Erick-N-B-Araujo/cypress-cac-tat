@@ -3,7 +3,7 @@
 // Suite de Testes
 describe('Central de Atendimento ao Cliente TAT', function() {
     const longText = 'Teste de input. Teste de input. Teste de input. Teste de input. Teste de input. Teste de input. Teste de input. Teste de input.'
-    
+    const THREE_SECONDS_IN_MILI = 3000
     beforeEach(function() {
         // Acessa uma pagina
         cy.visit('./src/index.html')
@@ -149,6 +149,71 @@ describe('Central de Atendimento ao Cliente TAT', function() {
     //Simular Viewport de dispositivo movel
     //cypress open --config viewportWidth=410,viewportHeight=730
 
-    
+    //Utilizando os clocks, temporizadores do navegador para parar ou avançar no tempo
 
+    it('Valida a duração do aparecimento da mensagem de erro', function(){
+        //Congela o relogio do navegador
+        cy.clock()
+        // Preenche os campos
+        cy.get('#firstName').type('Erick')
+        cy.get('#lastName').type('Araujo')
+        cy.get('#email').type('erick.araujo.qa@gmail.com')
+        cy.get('#open-text-area').type(longText, {delay: 0})
+        //Clica no botão
+        cy.contains('button', 'Enviar').click()
+        //Valida mensagem de feedback
+        cy.get('.success').should('be.visible')
+        //Avança no tempo do navegador
+        cy.tick(THREE_SECONDS_IN_MILI)
+        cy.get('.success').should('not.be.visible')
+    })
+
+    //Validar a execução estavel de um teste com Loadash
+    Cypress._.times(2, function() {
+        it('Acessar nova pagina removendo o atributo target e clicando no link, repetindo 2x', function(){
+            cy.get('#privacy a')
+            .should('have.attr', 'target', '_blank')
+            .invoke('removeAttr', 'target')
+            .click()
+            cy.contains('Talking About Testing').should('be.visible')
+        })
+    })
+
+    //Utilizar o invoke para fazer elementos aparecerem e desaparecerem
+    it('exibe e esconde as mensagens de sucesso e erro usando o .invoke', function() {
+        cy.get('.success')
+          .should('not.be.visible')
+          //Revela o elemento
+          .invoke('show')
+          .should('be.visible')
+          .and('contain', 'Mensagem enviada com sucesso.')
+          //Esconde o elemente
+          .invoke('hide')
+          .should('not.be.visible')
+        cy.get('.error')
+          .should('not.be.visible')
+          .invoke('show')
+          .should('be.visible')
+          .and('contain', 'Valide os campos obrigatórios!')
+          .invoke('hide')
+          .should('not.be.visible')
+    })
+    it('Preencher texto com o invoke', function(){
+        const otherLongText = Cypress._.repeat('0123456789', 20)
+
+        cy.get('#open-text-area')
+        .invoke('val', otherLongText)
+        .should('have.value', otherLongText)
+    })
+
+    //Fazer requisições a API
+    it.only('Fazer uma requisição HTTP', function(){
+        cy.request('https://cac-tat.s3-eu-central-1.amazonaws.com/index.html')
+        .should(function(response) {
+            const {status , statusText, body} = response
+            expect(status).to.equal(200)
+            expect(statusText).to.equal('OK')
+            expect(body).to.include('CAC TAT')
+        })
+    })
 })
