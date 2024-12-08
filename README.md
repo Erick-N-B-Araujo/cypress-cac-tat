@@ -1,8 +1,8 @@
 # Cypress Automation
 
-[![main](https://github.com/wlsf82/cy-data-test/actions/workflows/ci.yml/badge.svg)](https://github.com/wlsf82/cy-data-test/actions)
+[![main](https://github.com/Erick-N-B-Araujo/formacao-cypress-automation/actions/workflows/ci.yml/badge.svg)](https://github.com/Erick-N-B-Araujo/formacao-cypress-automation/actions)
 
-Sample project to demonstrate a `cy.dataTest` Cypress custom command.
+Sample project to demonstrate some types of tests and automation.
 
 ## Pre-requirements
 
