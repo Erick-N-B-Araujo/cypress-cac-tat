@@ -1,6 +1,5 @@
 /// <reference types="Cypress"/>
 
-
 // Suite de Testes
 describe('Central de Atendimento ao Cliente TAT', function() {
     const longText = 'Teste de input. Teste de input. Teste de input. Teste de input. Teste de input. Teste de input. Teste de input. Teste de input.'
@@ -46,7 +45,7 @@ describe('Central de Atendimento ao Cliente TAT', function() {
         cy.get('#firstName').type('Erick')
         cy.get('#lastName').type('Araujo')
         cy.get('#email').type('erick.araujo.qa@gmail.com')
-        cy.get('#phone-checkbox').click()
+        cy.get('#phone-checkbox').check()
         cy.get('#open-text-area').type(longText, {delay: 0})
         //Clica no botão
         cy.contains('button', 'Enviar').click()
@@ -88,12 +87,68 @@ describe('Central de Atendimento ao Cliente TAT', function() {
     it('Marca o tipo de atendimento Feedback', function(){
         cy.get('input[type="radio"][value="feedback"]').check().should('have.value', 'feedback')
     })
-    it.only('Marca cada tipo de atendimento', function(){
+    it('Marca cada tipo de atendimento', function(){
         cy.get('input[type="radio"]')
         .should('have.length', 3)
         .each(function($radio) {
-            
+            cy.wrap($radio).check()
+            cy.wrap($radio).should('be.checked')
         })
-        .check().should('have.value', 'feedback')
     })
+
+    //Campos de checkbox
+    it('Marcar ambos checkboxes e depois demarcar o ultimo', function(){
+        cy.get('input[type="checkbox"]')
+        .check()
+        .should('be.checked')
+        .last()
+        .uncheck()
+        .should('not.be.checked')
+    })
+
+    //Upload de arquivos
+    it('Upload selecionando um arquivo da pasta fixtures', function(){
+        cy.get('input[type="file"]')
+        .should('not.have.value')
+        .selectFile('cypress/fixtures/example.json')
+        .should(function($input){
+            expect($input[0].files[0].name).to.equal('example.json')
+        })
+    })
+    it('Upload selecionando um arquivo simulando drag-and-drop', function(){
+        cy.get('input[type="file"]')
+        .should('not.have.value')
+        .selectFile('cypress/fixtures/example.json', {action: 'drag-drop'})
+        .should(function($input){
+            expect($input[0].files[0].name).to.equal('example.json')
+        })
+    })
+    it('Upload selecionando uma fixture a qual foi dado um alias', function(){
+        cy.fixture('example').as('sampleFile')
+        cy.get('input[type="file"]')
+        .should('not.have.value')
+        .selectFile('@sampleFile')
+        .should(function($input){
+            expect($input[0].files[0].name).to.equal('example')
+        })
+    })
+
+    //Links que abrem em outra aba no navegador
+    it('Verificar que o link abre em outra aba sem a necessidade de um clique', function(){
+        cy.get('#privacy a')
+        .should('have.attr', 'target', '_blank')
+    })
+    it('Acessar nova pagina removendo o atributo target e clicando no link', function(){
+        cy.get('#privacy a')
+        .should('have.attr', 'target', '_blank')
+        .invoke('removeAttr', 'target')
+        .click()
+        cy.contains('Talking About Testing').should('be.visible')
+    })
+
+    //Simular Viewport de dispositivo movel
+    //cypress open --config viewportWidth=410,viewportHeight=730
+
+    
+
 })
